@@ -2,36 +2,147 @@
 using System;
 using System.Collections.Generic;
 
-int a;
-int b;
-int c;
-
-Console.Write("Nhap a: ");
-a = Convert.ToInt32(Console.ReadLine());
-
-while (true)
+public interface IHinh
 {
-    Console.Write("Nhap b: ");
-    try
+    double GetDienTich();
+    double GetChuVi();
+    void Nhap();
+    void HienThi();
+}
+
+
+public class HinhTron : IHinh
+{
+    private double banKinh;
+
+    public double BanKinh
     {
-        b = int.Parse(Console.ReadLine());
-        break;
+        get => banKinh;
+        set
+        {
+            if (value > 0)
+                banKinh = value;
+            else
+                Console.WriteLine("Bán kính phải lớn hơn 0!");
+        }
     }
-    catch
+
+    public void Nhap()
     {
-        Console.WriteLine("Nhap sai, vui long nhap lai");
+        do
+        {
+            Console.Write("Nhập bán kính hình tròn: ");
+            banKinh = double.Parse(Console.ReadLine());
+            if (banKinh <= 0) Console.WriteLine("Giá trị không hợp lệ. Vui lòng nhập lại!");
+        } while (banKinh <= 0);
+    }
+
+    public double GetDienTich() => Math.PI * banKinh * banKinh;
+
+    public double GetChuVi() => 2 * Math.PI * banKinh;
+
+    public void HienThi()
+    {
+        Console.WriteLine($"[Hình Tròn] Bán kính: {banKinh} | Chu vi: {GetChuVi():F2} | Diện tích: {GetDienTich():F2}");
     }
 }
 
-bool k;
-while (true)
+public class HinhChuNhat : IHinh
 {
-    Console.Write("Nhap c: ");
-    k = int.TryParse(Console.ReadLine(), out c);
-    if (k)
-        break;
-    else
-        Console.WriteLine("Nhap sai, vui long nhap lai.");
+    private double chieuDai;
+    private double chieuRong;
+
+    public void Nhap()
+    {
+        do
+        {
+            Console.Write("Nhập chiều dài: ");
+            chieuDai = double.Parse(Console.ReadLine());
+            Console.Write("Nhập chiều rộng: ");
+            chieuRong = double.Parse(Console.ReadLine());
+            if (chieuDai <= 0 || chieuRong <= 0)
+                Console.WriteLine("Chiều dài và chiều rộng phải lớn hơn 0. Vui lòng nhập lại!");
+        } while (chieuDai <= 0 || chieuRong <= 0);
+    }
+
+    public double GetDienTich() => chieuDai * chieuRong;
+
+    public double GetChuVi() => (chieuDai + chieuRong) * 2;
+
+    public void HienThi()
+    {
+        Console.WriteLine($"[Hình Chữ Nhật] Dài: {chieuDai}, Rộng: {chieuRong} | Chu vi: {GetChuVi():F2} | Diện tích: {GetDienTich():F2}");
+    }
 }
 
-Console.WriteLine($"{a}+{b}+{c} = {a + b + c}");
+public class HinhTamGiac : IHinh
+{
+    private double a, b, c;
+
+    public bool IsTamGiac(double sideA, double sideB, double sideC)
+    {
+        return (sideA > 0 && sideB > 0 && sideC > 0) &&
+               (sideA + sideB > sideC && sideA + sideC > sideB && sideB + sideC > sideA);
+    }
+
+    public void Nhap()
+    {
+        while (true)
+        {
+            Console.Write("Nhập cạnh a: ");
+            a = double.Parse(Console.ReadLine());
+            Console.Write("Nhập cạnh b: ");
+            b = double.Parse(Console.ReadLine());
+            Console.Write("Nhập cạnh c: ");
+            c = double.Parse(Console.ReadLine());
+
+            if (IsTamGiac(a, b, c))
+            {
+                break;
+            }
+            Console.WriteLine("Ba cạnh vừa nhập không thỏa mãn điều kiện lập thành tam giác! Vui lòng nhập lại.");
+        }
+    }
+
+    public double GetChuVi() => a + b + c;
+
+    public double GetDienTich()
+    {
+        // Sử dụng công thức Heron tính diện tích tam giác
+        double p = GetChuVi() / 2;
+        return Math.Sqrt(p * (p - a) * (p - b) * (p - c));
+    }
+
+    public void HienThi()
+    {
+        Console.WriteLine($"[Hình Tam Giác] Các cạnh: {a}, {b}, {c} | Chu vi: {GetChuVi():F2} | Diện tích: {GetDienTich():F2}");
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+        List<IHinh> danhSachHinh = new List<IHinh>
+        {
+            new HinhTron(),
+            new HinhChuNhat(),
+            new HinhTamGiac()
+        };
+
+        Console.WriteLine("=== NHẬP THÔNG TIN CÁC HÌNH ===");
+        foreach (var hinh in danhSachHinh)
+        {
+            Console.WriteLine();
+            hinh.Nhap();
+        }
+
+        Console.WriteLine("\n=== KẾT QUẢ TÍNH TOÁN (ĐA HÌNH) ===");
+        foreach (var hinh in danhSachHinh)
+        {
+            hinh.HienThi();
+        }
+    }
+}
