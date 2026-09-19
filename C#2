@@ -1,0 +1,121 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace StudentManagement
+{
+    public class Student
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public int Age { get; set; }
+        public string Email { get; set; }
+
+        public Student(string id, string name, int age, string email)
+        {
+            Id = id;
+            Name = name;
+            Age = age;
+            Email = email;
+        }
+
+        public void Display()
+        {
+            Console.WriteLine($"ID: {Id} | Name: {Name} | Age: {Age} | Email: {Email}");
+        }
+    }
+
+    public class StudentDAO
+    {
+        private List<Student> studentList;
+
+        public StudentDAO()
+        {
+            studentList = new List<Student>();
+        }
+
+        public bool Add(Student student)
+        {
+            if (GetById(student.Id) != null)
+            {
+                return false; 
+            }
+            studentList.Add(student);
+            return true;
+        }
+
+        public bool Edit(Student student)
+        {
+            var existingStudent = GetById(student.Id);
+            if (existingStudent == null)
+            {
+                return false; 
+            }
+
+            existingStudent.Name = student.Name;
+            existingStudent.Age = student.Age;
+            existingStudent.Email = student.Email;
+            return true;
+        }
+
+        public bool Delete(string id)
+        {
+            var student = GetById(id);
+            if (student == null)
+            {
+                return false;
+            }
+
+            studentList.Remove(student);
+            return true;
+        }
+
+        public List<Student> GetAlls()
+        {
+            return studentList;
+        }
+
+        public Student GetById(string id)
+        {
+            return studentList.FirstOrDefault(s => s.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public List<Student> GetByName(string name)
+        {
+            return studentList
+                .Where(s => s.Name.Contains(name, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+            StudentDAO dao = new StudentDAO();
+
+            dao.Add(new Student("SV01", "Nguyen Van A", 20, "a@gmail.com"));
+            dao.Add(new Student("SV02", "Tran Thi B", 21, "b@gmail.com"));
+
+            Console.WriteLine("--- DANH SACH SINH VIEN ---");
+            foreach (var s in dao.GetAlls())
+            {
+                s.Display();
+            }
+
+            dao.Edit(new Student("SV01", "Nguyen Van A (Updated)", 22, "a_new@gmail.com"));
+
+            Console.WriteLine("\n--- TIM KIEM THEO TEN 'Tran' ---");
+            foreach (var s in dao.GetByName("Tran"))
+            {
+                s.Display();
+            }
+
+            dao.Delete("SV02");
+            Console.WriteLine("\n--- SAU KHI XOA SV02 ---");
+            Console.WriteLine($"Tong so sinh vien: {dao.GetAlls().Count}");
+        }
+    }
+}
