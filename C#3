@@ -1,0 +1,144 @@
+using System.ComponentModel.DataAnnotations;
+
+public class LopHoc
+{
+    [Key]
+    public string MaLop { get; set; } = string.Empty;
+    
+    [Required]
+    public string TenLop { get; set; } = string.Empty;
+}
+
+public class SinhVien
+{
+    [Key]
+    [Required(ErrorMessage = "Mã sinh viên không được để trống")]
+    public string MaSV { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Họ tên không được để trống")]
+    public string HoTen { get; set; } = string.Empty;
+
+    public DateTime NgaySinh { get; set; }
+    public string GioiTinh { get; set; } = "Nam";
+    public string Email { get; set; } = string.Empty;
+    public string DienThoai { get; set; } = string.Empty;
+    
+    [Range(0, 10, ErrorMessage = "Điểm phải từ 0 đến 10")]
+    public double Diem { get; set; }
+
+    public string MaLop { get; set; } = string.Empty;
+    public string TrangThai { get; set; } = string.Empty;
+}
+
+private void MainForm_Load(object sender, EventArgs e)
+{
+    // a. Focus vào txtMaSV, enable nút Thêm, disable Sửa/Xóa
+    txtMaSV.Focus();
+    btnThem.Enabled = true;
+    btnSua.Enabled = false;
+    btnXoa.Enabled = false;
+
+    // b. Đổ dữ liệu vào ComboBox lớp học & trạng thái
+    LoadComboBoxData();
+
+    // c. Đổ dữ liệu vào DataGridView danh sách sinh viên
+    LoadDataGridViewData();
+}
+
+private void LoadComboBoxData()
+{
+    // Ví dụ giả lập data cho ComboBox Lớp
+    cboLop.Items.Add("Kỹ thuật phần mềm 01");
+    cboLop.Items.Add("Trí tuệ nhân tạo 01");
+    cboLop.SelectedIndex = 0;
+
+    cboTrangThai.Items.Add("Đang học");
+    cboTrangThai.Items.Add("Bảo lưu");
+    cboTrangThai.SelectedIndex = 0;
+}
+
+private void LoadDataGridViewData()
+{
+    // Code kết nối CSDL hoặc danh sách mẫu để bind lên dgvSinhVien
+}
+
+private void txtMaSV_Leave(object sender, EventArgs e)
+{
+    string maSV = txtMaSV.Text.Trim();
+    if (string.IsNullOrEmpty(maSV)) return;
+
+    // Giả sử có hàm tìm kiếm sinh viên trong CSDL/List theo mã
+    SinhVien sv = TimSinhVienTheoMa(maSV); 
+
+    if (sv != null)
+    {
+        // Tồn tại: hiển thị thông tin lên các điều khiển
+        txtHoTen.Text = sv.HoTen;
+        dtpNgaySinh.Value = sv.NgaySinh;
+        // ... gán các trường khác (Giới tính, Email, Điểm, Lớp...)
+        
+        // Disable chức năng nhập/thêm, enable Sửa, Xóa
+        txtMaSV.Enabled = false; // khóa mã lại không cho sửa khóa chính
+        btnThem.Enabled = false;
+        btnSua.Enabled = true;
+        btnXoa.Enabled = true;
+    }
+    else
+    {
+        // Chưa tồn tại: xóa trắng các control khác, bật chức năng nhập
+        ClearInputFields();
+        btnThem.Enabled = true;
+        btnSua.Enabled = false;
+        btnXoa.Enabled = false;
+    }
+}
+
+private SinhVien TimSinhVienTheoMa(string ma)
+{
+    // Viết logic truy vấn database trả về SinhVien hoặc null nếu không thấy
+    return null; 
+}
+
+private void ClearInputFields()
+{
+    txtHoTen.Clear();
+    txtEmail.Clear();
+    txtDienThoai.Clear();
+    // Đặt lại giá trị mặc định các control khác
+}
+
+private void btnLamMoi_Click(object sender, EventArgs e)
+{
+    // Xóa trắng toàn bộ ô nhập liệu
+    txtMaSV.Clear();
+    txtMaSV.Enabled = true; // Cho phép nhập lại mã mới
+    ClearInputFields();
+
+    // Thiết lập lại trạng thái các Button
+    btnThem.Enabled = true;
+    btnSua.Enabled = false;
+    btnXoa.Enabled = false;
+
+    // Chuyển tiêu điểm về txtMaSV
+    txtMaSV.Focus();
+}
+
+private void btnXoa_Click(object sender, EventArgs e)
+{
+    // Hiển thị hộp thoại cảnh báo trước khi thực hiện chức năng nguy hiểm
+    DialogResult result = MessageBox.Show(
+        "Bạn có chắc chắn muốn xóa sinh viên có mã " + txtMaSV.Text + " không?", 
+        "Xác nhận xóa", 
+        MessageBoxButtons.YesNo, 
+        MessageBoxIcon.Warning
+    );
+
+    if (result == DialogResult.Yes)
+    {
+        // Thực hiện logic xóa trong cơ sở dữ liệu
+        // Sau đó gọi lại nút làm mới
+        btnLamMoi_Click(sender, e);
+        MessageBox.Show("Đã xóa thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+}
+
